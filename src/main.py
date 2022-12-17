@@ -3,13 +3,14 @@ from train import *
 from lda_bert import *
 from utils import *
 from topic2vec import *
+from bertTopic import *
+
 # from lda_umap import *
 # from HCluster import *
+# from agglomerative import *
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-
 
 def main(dataset,method,k):
    
@@ -17,7 +18,7 @@ def main(dataset,method,k):
     Preprocessor = Preprocess(dataset)
     data = Preprocessor.load_data()
     sentences , token_lists, idx_sample_list = Preprocessor.preprocess()
-    
+        
     print(" Preprocessing done")
     
     # Train model
@@ -67,11 +68,21 @@ def main(dataset,method,k):
         evaluate_top2vec(model.topic_words,sentences)
         for topic in range(model.get_num_topics()):
             model.generate_topic_wordcloud(topic,background_color='white')
-
-
+        
+    elif method == "Bertopic":
+        topic_list = []
+        print("Total number of topics are:",len(model.get_topics()))
+        for i in range(len(model.get_topics())-1):
+            for j in model.get_topic(topic=i):
+                topic_list.append(j[0])
+        print("topic_list:",topic_list)
+        evaluate_bertopic(topic_list,sentences)
+        
+        # Add bar chart for each topic
+        model.visualize_barchart()
 
 if __name__ == '__main__':
     
     
     # Test out the possible pa
-    main(dataset='short',method='LDA_BERT',k=5)
+    main(dataset='short',method='Top2Vec',k=5)
