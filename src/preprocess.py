@@ -200,7 +200,7 @@ class Preprocess():
         
         return word_list
     
-    def preprocess(self,sample_size=1000):
+    def preprocess(self,sample_size=100):
         
         
         data = self.load_data()

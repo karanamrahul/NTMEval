@@ -80,7 +80,7 @@ class Topic_Model:
         :param k: number of topics
         :param method: method chosen for the topic model
         """
-        if method not in {'TFIDF', 'LDA', 'BERT', 'LDA_BERT','SROBERTA'}:
+        if method not in {'TFIDF', 'LDA', 'BERT', 'LDA_BERT','SROBERTA','LDA_DIFFCSE','DIFFCSE'}:
             raise Exception('Invalid method!')
         self.k = k
         self.dictionary = None
@@ -165,7 +165,33 @@ class Topic_Model:
             print('Getting vector representations for S-RoBERTA. Done!')
             return vec
 
-             
+        elif method == 'DIFFCSE':
+            print("Generating DiffCSE Sentence Embedding....")
+            from DiffCSE.diffcse import DiffCSE
+            model = DiffCSE("voidism/diffcse-bert-base-uncased-sts")
+            vec_diffcse = model.encode(sentences)
+            print("Getting Vector representations for DiffCSE embedding")
+            return vec_diffcse
+
+        elif method == 'LDA_DIFFCSE':
+  
+            vec_lda = self.vectorize(sentences, token_lists, method='LDA')
+            from DiffCSE.diffcse import DiffCSE
+            model = DiffCSE("voidism/diffcse-bert-base-uncased-sts")
+            vec_diffcse = model.encode(sentences)
+            vec_ldadiffcse = np.c_[vec_lda * self.gamma, vec_diffcse]
+            print("LDA+DIFFCSE Shape:", vec_ldadiffcse.shape)
+            self.vec['LDA_BERT_FULL'] = vec_ldadiffcse
+            if not self.AE:
+                self.AE = Autoencoder()
+                print('Fitting Autoencoder ...')
+                self.AE.fit(vec_ldadiffcse)
+                print('Fitting Autoencoder Done!')
+            vec = self.AE.encoder.predict(vec_ldadiffcse)
+            print("Autoencoder vec_ldabert:", vec.shape)
+            print("Executing non UMAP code")
+            return vec
+
         elif method == 'LDA_BERT':
         #else:
             # print("Senetnces",len(sentences))

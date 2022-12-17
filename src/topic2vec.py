@@ -6,10 +6,6 @@ from gensim.utils import tokenize
 from gensim.models import CoherenceModel
 TOKENIZERS_PARALLELISM = True
 
-
-
-
-
 def top2vec_train(sentences, embedding_model='all-MiniLM-L6-v2'):
     """
     Train Top2Vec model

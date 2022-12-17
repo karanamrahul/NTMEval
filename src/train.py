@@ -37,6 +37,18 @@ class Trainer(object):
             tm.fit(self.data,self.token_lists)
             
             return tm
+
+        elif self.method == 'DIFFCSE':
+            tm = Topic_Model(k=self.k, method='DIFFCSE')
+            tm.fit(self.data,self.token_lists)
+            
+            return tm
+
+        elif self.method == 'LDA_DIFFCSE':
+            tm = Topic_Model(k=self.k, method='LDA_DIFFCSE')
+            tm.fit(self.data,self.token_lists)
+            
+            return tm
             
         elif self.method == 'Top2Vec':
             tm = top2vec_train(self.data)
