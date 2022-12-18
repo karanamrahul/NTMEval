@@ -38,7 +38,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from language_detector import detect_language
 from sklearn.datasets import fetch_20newsgroups
-
+from octis.dataset.dataset import Dataset
 
 
 import pkg_resources
@@ -76,13 +76,8 @@ class Preprocess():
 
     def load_data(self):
         if self.dataset == 'short':
-            # data = pd.read_csv(self.data_path, header=None)
-            # labels = pd.read_csv(self.label_path, header=None)
-            # data = data.values
-            # labels = labels.values
             
-            # Kritika
-            folder_path = "/home/jugaad/CMSC723/723/data/bbc"
+            folder_path = "/data/bbc"
             folders = ['entertainment','business','sport','politics','tech']
             
             news=[]
@@ -100,29 +95,22 @@ class Preprocess():
             data = df.News
             labels = df.category
             
-            # return data, labels
-            print(len(data.to_list()))
-            return data.to_list()
+            return data.to_list(), labels.to_list()
         elif self.dataset == 'medium':
-            data = pd.read_csv(self.data_path, header=None)
-            labels = pd.read_csv(self.label_path, header=None)
-            data = data.values
-            labels = labels.values
-            return data, labels
+            # Load a medium dataset
+            dataset = Dataset()
+            dataset.fetch_dataset("M10")
+            token_list= dataset.get_corpus()
+            labels = dataset.get_labels()
+            sentences= [" ".join(token) for token in token_list]
+            return sentences, labels
         elif self.dataset == 'long':
-            data = pd.read_csv(self.data_path, header=None)
-            labels = pd.read_csv(self.label_path, header=None)
-            data = data.values
-            labels = labels.values
-            return data, labels
-        elif self.dataset == '20newsgroup':
-            # data = pd.read_csv(self.data_path, header=None)
-            # labels = pd.read_csv(self.label_path, header=None)
-            # data = data.values
-            # labels = labels.values
-            data = fetch_20newsgroups(subset='all')['data']
-            print(len(data))
-            return data
+            dataset = Dataset()
+            dataset.fetch_dataset("20NewsGroup")
+            token_list= dataset.get_corpus()
+            labels = dataset.get_labels()
+            sentences= [" ".join(token) for token in token_list]
+            return sentences, labels
         else:
             print('Invalid dataset name')
 
@@ -200,17 +188,17 @@ class Preprocess():
         
         return word_list
     
-    def preprocess(self,sample_size=100):
+    def preprocess(self,sample_size=1000):
         
         
         data = self.load_data()
         
-        if not sample_size or sample_size > len(data):
-            sample_size = len(data)
+        if not sample_size or sample_size > len(data[0]):
+            sample_size = len(data[0])
             
         print('Preprocessing {} samples'.format(sample_size))
         
-        number_docs = len(data)
+        number_docs = len(data[0])
         
         sentences = []
         token_lists = []
@@ -219,7 +207,7 @@ class Preprocess():
         sample = np.random.choice(number_docs, sample_size, replace=False)
         
         for i, idx in enumerate(sample):
-            sentence = self.preprocess_sentence(data[idx])
+            sentence = self.preprocess_sentence(data[0][idx])
             if sentence:
                 sentences.append(sentence)
                 token_lists.append(self.preprocess_words(sentence))

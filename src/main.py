@@ -2,7 +2,7 @@ from preprocess import *
 from train import *
 from utils import *
 from topic2vec import *
-from bertTopic import *
+from BertTopic import *
 import argparse
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -13,7 +13,7 @@ def main(dataset,embeddingmethod,dimReduction,clusterMethod,k,embeddingmodel):
    
     # Loading data and Pre-processing
     Preprocessor = Preprocess(dataset)
-    data = Preprocessor.load_data()
+    data, labels = Preprocessor.load_data()
     sentences , token_lists, idx_sample_list = Preprocessor.preprocess()
         
     print(" Preprocessing done")
@@ -31,19 +31,19 @@ def main(dataset,embeddingmethod,dimReduction,clusterMethod,k,embeddingmodel):
     if embeddingmethod in ["LDA_S_TRANS","LDA_DIFFCSE"]:
         # Get coherence
         print("Model is:",model)
-        coherence_cv , coherence_npmi = get_coherence(tm,model, token_lists)
+        # coherence_cv , coherence_npmi = get_coherence(tm,model, token_lists)
 
-        print("-"*50)
-        print("Evaluation results for {}:".format(embeddingmethod))
-        print("-"*50)
-        print("Model       Score")
-        print("-"*50)
-        print("{} Coherence CV: {}".format(embeddingmethod, coherence_cv))
-        print("-"*50)
-        print("{} Coherence NPMI: {}".format(embeddingmethod, coherence_npmi))
-        print("-"*50)
+        # print("-"*50)
+        # print("Evaluation results for {}:".format(embeddingmethod))
+        # print("-"*50)
+        # print("Model       Score")
+        # print("-"*50)
+        # print("{} Coherence CV: {}".format(embeddingmethod, coherence_cv))
+        # print("-"*50)
+        # print("{} Coherence NPMI: {}".format(embeddingmethod, coherence_npmi))
+        # print("-"*50)
         # print("{} Topic Diversity: {}".format(method, 
-        
+        print_evaluations(tm, model, token_lists,labels,k, embeddingmethod)
         # print("Silhoulette:", silhoulette)
         # print("Topics:", topics)
         # return coherence, silhoulette, topics
@@ -66,7 +66,7 @@ def main(dataset,embeddingmethod,dimReduction,clusterMethod,k,embeddingmodel):
             for j in tm.get_topic(topic=i):
                 topic_list.append(j[0])
         print("topic_list:",topic_list)
-        evaluate_bertopic(topic_list,sentences)
+        evaluate_bertopic(topic_list,sentences) #TODO: add clustering method
         
         # Add bar chart for each topic
         tm.visualize_barchart()
@@ -88,4 +88,4 @@ if __name__ == '__main__':
     
     # self.embedding_models = ["all-distilroberta-v1","all-MiniLM-L6-v2","multi-qa-MiniLM-L6-cos-v1","paraphrase-MiniLM-L3-v2"]
 
-    main(dataset='short',embeddingmethod='LDA_S_TRANS',dimReduction="UMAP",clusterMethod="agglomerative",k=5,embeddingmodel="all-MiniLM-L6-v2")
+    main(dataset='long',embeddingmethod='LDA_S_TRANS',dimReduction="UMAP",clusterMethod="agglomerative",k=5,embeddingmodel="all-MiniLM-L6-v2")
