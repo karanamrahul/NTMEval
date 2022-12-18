@@ -2,9 +2,8 @@
 from preprocess import *
 from train import *
 from octis.evaluation_metrics.diversity_metrics import TopicDiversity
-from lda_bert import *
-from lda_umap import *
-from HCluster import *
+from bertTopic import *
+from collections import Counter
 
 
 def get_topic_words(token_lists, labels, k=None):
@@ -14,7 +13,7 @@ def get_topic_words(token_lists, labels, k=None):
   topics = ['' for _ in range(k)]
   # print("Topics:", topics)
   for i, c in enumerate(token_lists):
-    print("i is:", i)
+    
     topics[labels[i]] += (' ' + ' '.join(c))
   # print("Topics:", topics)
   word_counts = list(map(lambda x: Counter(x.split()).items(), topics))
@@ -105,38 +104,21 @@ def get_wordcloud(model, token_list, topics):
   print('Getting wordcloud for topics {}. Done!'.format(topics))
   
   
-def get_coherence(model, token_list):
-      ''' Get model coherence from gensim.models.coherencemodel
-          : param model: Topic_Model object
-          : param token_lists: token list of docs
-          : param topics: topics as top words 
-          : param measure: coherence metrics
-          : return: coherence score(c_v & npmi) '''
-
-      if model.method == 'LDA':
-        cm_cv = CoherenceModel(model=model.ldamodel, texts=token_list, corpus = model.corpus, dictionary=model.dictionary, coherence = 'c_v')
-        cm_npmi= CoherenceModel(model=model.ldamodel, texts=token_list, corpus = model.corpus, dictionary=model.dictionary, coherence = 'c_npmi')
-      else:
-        # Comment - kritika
-        # topics = get_topic_words(token_list, model.cluster_model.labels_)
-        print("model.sub_cluster.labels_", len(model.cluster_model.labels_))
-        topics = get_topic_words(token_list, model.cluster_model.labels_)
-        
-        # comment Need to change this to accomodate HDBSCAN & Clustering
-        # topics = get_topic_words(token_list, model.hdb_model.labels_)
-        cm_cv = CoherenceModel(topics=topics, texts = token_list, corpus=model.corpus, dictionary=model.dictionary, coherence = 'c_v')
-        cm_npmi = CoherenceModel(topics=topics, texts = token_list, corpus=model.corpus, dictionary=model.dictionary, coherence = 'c_npmi')
-        return cm_cv.get_coherence(), cm_npmi.get_coherence()
+def get_coherence(model,cluster_model, token_list): 
+    # topics = get_topic_words(token_list, model.cluster_model.labels_
+    print("model.sub_cluster.labels_", len(cluster_model.labels_))
+    topics = get_topic_words(token_list, cluster_model.labels_)
+    
+    # topics = get_topic_words(token_list, model.hdb_model.labels_)
+    cm_cv = CoherenceModel(topics=topics, texts = token_list, corpus=model.corpus, dictionary=model.dictionary, coherence = 'c_v')
+    cm_npmi = CoherenceModel(topics=topics, texts = token_list, corpus=model.corpus, dictionary=model.dictionary, coherence = 'c_npmi')
+    return cm_cv.get_coherence(), cm_npmi.get_coherence()
       
 # def get_topic_diversity(model, token_list):
       
-#       """_summary_: Get topic diversity from gensim.models.coherencemodel
-#       : param model: Topic_Model object
-#       : param token_lists: token list of docs
-#       : param topics: topics as top words"""
-      topic_keywords = get_topic_words(token_list, model.cluster_model.labels_) # get topic words
+    topic_keywords = get_topic_words(token_list, model.cluster_model.labels_) # get topic words
 
-      tm_topics = []  # list of lists of words in each topic
+    tm_topics = []  # list of lists of words in each topic
       
       
       # for k,v in topic_keywords.items(): # k is topic number, v is list of tuples (word, prob)
