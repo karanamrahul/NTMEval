@@ -1,18 +1,15 @@
 from preprocess import *
 from train import *
-from lda_bert import *
 from utils import *
 from topic2vec import *
 from bertTopic import *
-
-# from lda_umap import *
-# from HCluster import *
-# from agglomerative import *
-
+import argparse
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-def main(dataset,method,k):
+
+
+def main(dataset,embeddingmethod,dimReduction,clusterMethod,k,embeddingmodel):
    
     # Loading data and Pre-processing
     Preprocessor = Preprocess(dataset)
@@ -22,36 +19,28 @@ def main(dataset,method,k):
     print(" Preprocessing done")
     
     # Train model
-    trainer = Trainer(method=method,k=k,data = sentences,token_lists=token_lists)
-    model = trainer.train()
-    print(" Training done")
-    
-    # # Fit model
-    # model.fit(sentences,token_lists)
+    trainer = Trainers(embeddingmethod=embeddingmethod,dimReduction=dimReduction,clusterMethod=clusterMethod,k=k,data = sentences,token_lists=token_lists,embeddingmodel=embeddingmodel)
+   
+    if embeddingmethod not in ['Bertopic','Top2Vec']:
+        tm,model = trainer.train()
+    else:
+        tm = trainer.train()
     
     print(" Fitting done")
     # Evaluate model
-    
-    if method == "LDA_BERT" or method == "SROBERTA":
+    if embeddingmethod in ["LDA_S_TRANS","LDA_DIFFCSE"]:
         # Get coherence
-        coherence_cv , coherence_npmi = get_coherence(model, token_lists)
-        # diversity = get_topic_diversity(model, topk_words)
-        # # Get silhoulette
-        # silhoulette = get_silhoulette(model)
-        # # Plot UMAP
-        # plot_project(model.vec[model.method], model.cluster_model.labels_)
-        # # Get topics
-        # topics = get_topic_words(token_lists, model.cluster_model.labels_)
-        # # Print results
-        # print("Token lists:", token_lists[1:10])
+        print("Model is:",model)
+        coherence_cv , coherence_npmi = get_coherence(tm,model, token_lists)
+
         print("-"*50)
-        print("Evaluation results for {}:".format(method))
+        print("Evaluation results for {}:".format(embeddingmethod))
         print("-"*50)
         print("Model       Score")
         print("-"*50)
-        print("{} Coherence CV: {}".format(method, coherence_cv))
+        print("{} Coherence CV: {}".format(embeddingmethod, coherence_cv))
         print("-"*50)
-        print("{} Coherence NPMI: {}".format(method, coherence_npmi))
+        print("{} Coherence NPMI: {}".format(embeddingmethod, coherence_npmi))
         print("-"*50)
         # print("{} Topic Diversity: {}".format(method, 
         
@@ -59,30 +48,44 @@ def main(dataset,method,k):
         # print("Topics:", topics)
         # return coherence, silhoulette, topics
         
-    elif method == "Top2Vec":
-        print("Number of topics:", model.get_num_topics())
-        print("Topic words:", model.get_topics())
-        for i in range(model.get_num_topics()):
-        # model.get_num_topics():
-            print("TOP 10 Words for topic:{} --> {}        ",(i,model.topic_words[i]))
-        evaluate_top2vec(model.topic_words,sentences)
-        for topic in range(model.get_num_topics()):
-            model.generate_topic_wordcloud(topic,background_color='white')
+    elif embeddingmethod == "Top2Vec":
+        print("Number of topics:", tm.get_num_topics())
+        print("Topic words:", tm.get_topics())
+        for i in range(tm.get_num_topics()):
+        # tm.get_num_topics():
+            print("TOP 10 Words for topic:{} --> {}        ",(i,tm.topic_words[i]))
+        print("topic words:", tm.topic_words)
+        evaluate_top2vec(tm.topic_words,sentences)
+        for topic in range(tm.get_num_topics()):
+            tm.generate_topic_wordcloud(topic,background_color='white')
         
-    elif method == "Bertopic":
+    elif embeddingmethod == "Bertopic":
         topic_list = []
-        print("Total number of topics are:",len(model.get_topics()))
-        for i in range(len(model.get_topics())-1):
-            for j in model.get_topic(topic=i):
+        print("Total number of topics are:",len(tm.get_topics()))
+        for i in range(len(tm.get_topics())-1):
+            for j in tm.get_topic(topic=i):
                 topic_list.append(j[0])
         print("topic_list:",topic_list)
         evaluate_bertopic(topic_list,sentences)
         
         # Add bar chart for each topic
-        model.visualize_barchart()
+        tm.visualize_barchart()
+
+
 
 if __name__ == '__main__':
     
     
-    # Test out the possible pa
-    main(dataset='short',method='Top2Vec',k=5)
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='short', help='Dataset to use')
+    parser.add_argument('--embeddingmethod', type=str, default = 'LDA_S_TRANS', help='Embedding method to use')
+    parser.add_argument('--dimReduction', type=str, default = 'UMAP', help='Dimensionality reduction method to use')
+    parser.add_argument('--clusterMethod', type=str, default = 'KMeans', help='Clustering method to use')
+    parser.add_argument('--k', type=int, default = 5, help='Number of clusters')
+    parser.add_argument('--embeddingmodel', type=str, default = "all-MiniLM-L6-v2", help='Embedding model to use')
+    args = parser.parse_args()
+    
+    # self.embedding_models = ["all-distilroberta-v1","all-MiniLM-L6-v2","multi-qa-MiniLM-L6-cos-v1","paraphrase-MiniLM-L3-v2"]
+
+    main(dataset='short',embeddingmethod='LDA_S_TRANS',dimReduction="UMAP",clusterMethod="agglomerative",k=5,embeddingmodel="all-MiniLM-L6-v2")
