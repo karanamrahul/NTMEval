@@ -54,28 +54,10 @@ def plot_umap(data, labels, title):
     plt.title(title, fontsize=18)
     plt.show()
     
-def plot_coherence(model, token_list, measure='c_v'):
-    """
-    Plot the coherence score for the topic model.
-    :param model: Topic_Model object
-    :param token_lists: token list of docs
-    :param topics: topics as top words 
-    :param measure: coherence metrics
-    :return: None
-    """
-    if model.method == 'LDA':
-        cm = CoherenceModel(model=model.ldamodel, texts=token_list, corpus=model.corpus, dictionary=model.dictionary, coherence=measure)
-    else:
-        
-        # topics = get_topic_words(token_list, model.cluster_model.labels_)
-        topics = get_topic_words(token_list, model.hdb_model.labels_)
-        cm = CoherenceModel(topics=topics, texts=token_list, corpus=model.corpus, dictionary=model.dictionary, coherence=measure)
-    print(cm.get_coherence())
-    cm = cm.to_dict()
-    plt.figure(figsize=(10, 5))
-    plt.plot(cm['x'], cm['coherence_values'])
-    plt.xlabel("Number of Topics")
-    plt.ylabel("Coherence score")
-    plt.legend(("coherence_values"), loc='best')
-    plt.show()
+def plot_coherence(model,cv_bow,cv_tfidf,npmi_bow,npmi_tfidf):
+    
+    model_name = str(model.emebeddingmethod)
+    
+    pass
+    
     

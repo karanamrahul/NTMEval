@@ -43,7 +43,12 @@ def main(dataset,embeddingmethod,dimReduction,clusterMethod,k,embeddingmodel):
         # print("{} Coherence NPMI: {}".format(embeddingmethod, coherence_npmi))
         # print("-"*50)
         # print("{} Topic Diversity: {}".format(method, 
-        print_evaluations(tm, model, token_lists,labels,k, embeddingmethod)
+        print_evaluations(tm, model, token_lists,labels,k, embeddingmethod,sentences)
+        
+        
+        # print("C-TFIDF Topic Words",get_topic_words_ctfidf(sentences,token_lists,model.labels_))
+        # print("Length of topic words:",len(get_topic_words_ctfidf(sentences,token_lists,model.labels_)))
+        
         # print("Silhoulette:", silhoulette)
         # print("Topics:", topics)
         # return coherence, silhoulette, topics
@@ -88,4 +93,4 @@ if __name__ == '__main__':
     
     # self.embedding_models = ["all-distilroberta-v1","all-MiniLM-L6-v2","multi-qa-MiniLM-L6-cos-v1","paraphrase-MiniLM-L3-v2"]
 
-    main(dataset='medium',embeddingmethod='LDA_DIFFCSE',dimReduction="UMAP",clusterMethod="agglomerative",k=10,embeddingmodel="paraphrase-MiniLM-L3-v2")
+    main(dataset='short',embeddingmethod='LDA_DIFFCSE',dimReduction="AE",clusterMethod="KMeans",k=5,embeddingmodel="paraphrase-MiniLM-L3-v2")

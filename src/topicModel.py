@@ -85,7 +85,7 @@ class Topic_Model:
         
         reduced_embedding = self.dim.fit(embedding)
         
-        self.cluster = Clustering(self.clusterMethod)
+        self.cluster = Clustering(self.clusterMethod, self.k)
         
         cluster_model=self.cluster.cluster_train(reduced_embedding)
         return cluster_model

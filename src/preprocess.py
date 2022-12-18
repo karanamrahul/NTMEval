@@ -77,7 +77,7 @@ class Preprocess():
     def load_data(self):
         if self.dataset == 'short':
             
-            folder_path = "/data/bbc"
+            folder_path = "/home/jugaad/CMSC723/723/studious-dollop/data/bbc"
             folders = ['entertainment','business','sport','politics','tech']
             
             news=[]
@@ -188,7 +188,7 @@ class Preprocess():
         
         return word_list
     
-    def preprocess(self,sample_size=1000):
+    def preprocess(self,sample_size=222):
         
         
         data = self.load_data()
