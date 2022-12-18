@@ -1,5 +1,5 @@
 from topic2vec import *
-from bertTopic import *
+from BertTopic import *
 from topicModel import *
 
 

@@ -88,4 +88,4 @@ if __name__ == '__main__':
     
     # self.embedding_models = ["all-distilroberta-v1","all-MiniLM-L6-v2","multi-qa-MiniLM-L6-cos-v1","paraphrase-MiniLM-L3-v2"]
 
-    main(dataset='long',embeddingmethod='LDA_S_TRANS',dimReduction="UMAP",clusterMethod="agglomerative",k=5,embeddingmodel="all-MiniLM-L6-v2")
+    main(dataset='medium',embeddingmethod='LDA_DIFFCSE',dimReduction="UMAP",clusterMethod="agglomerative",k=10,embeddingmodel="paraphrase-MiniLM-L3-v2")
